@@ -1,0 +1,43 @@
+- hosts: localhost
+  tasks: 
+  - lvol:
+      vg: cloud
+      lv: ragh
+      size: 2
+  - filesystem:
+      fstype: ext4
+      dev: /dev/cloud/ragh
+      force: yes
+  - file: 
+      path: "/cloud/ragh"
+      state: directory
+      owner: apache
+      mode: 0777
+  - mount:
+      path: "/cloud/ragh"
+      src: "/dev/cloud/ragh"
+      fstype: ext4
+      state: mounted
+ - lineinfile: 
+      path: "/etc/exports"
+      line: "/cloud/ragh  *(rw,no_root_squash)"
+  - service: 
+      name: "nfs" 
+      state: restarted
+      enabled: yes
+- hosts: Man
+  tasks:
+  - file:
+      path: "/root/ragh"
+      state: directory
+      owner: apache
+      mode: 0777
+  - service:
+      name: "firewalld"
+      state: stopped
+  - command: "mount 192.168.8.103:/cloud/ragh /root/ragh"
+  - mount: 
+      path: "/root/ragh"
+      src: "192.168.8.103:/cloud/ragh"
+      fstype: ext4
+      state: mounted
