@@ -1,0 +1,13 @@
+#------------Master's var #overwrite localhost with your master ip
+master_ip: localhost
+vg_name: myvg
+lv_name: mylv
+lv_size: 2
+fstype: ext4
+device: /dev/myvg/mylv
+master_path: /opt/staas
+
+#---------Tenant's var
+
+tenant_ip: localhost #overwrite localhost with your tenant ip
+tenant_path: /opt/staas

@@ -1,43 +1,44 @@
-- hosts: localhost
-  tasks: 
+- hosts: "{{ master_ip }}"
+  tasks:
+  - include: defaults/main.yml 
   - lvol:
-      vg: cloud
-      lv: ragh
-      size: 2
+      vg: "{{ vg_name }}"
+      lv: "{{ lv_name }}"
+      size: "{{ lv_size }}"
   - filesystem:
-      fstype: ext4
-      dev: /dev/cloud/ragh
+      fstype: "{{ fstype }}"
+      dev: "{{ device }}"
       force: yes
   - file: 
-      path: "/cloud/ragh"
+      path: "{{ master_path }}"
       state: directory
       owner: apache
       mode: 0777
   - mount:
-      path: "/cloud/ragh"
-      src: "/dev/cloud/ragh"
-      fstype: ext4
+      path: "{{ master_path }}"
+      src: "{{ device }}"
+      fstype: "{{ fstype }}"
       state: mounted
- - lineinfile: 
+  - lineinfile: 
       path: "/etc/exports"
-      line: "/cloud/ragh  *(rw,no_root_squash)"
+      line: "{{ master_path }}  *(rw,no_root_squash)"
   - service: 
       name: "nfs" 
       state: restarted
       enabled: yes
-- hosts: Man
+- hosts: "{{ tenant_ip }}"
   tasks:
   - file:
-      path: "/root/ragh"
+      path: "{{ tenant_path }}"
       state: directory
       owner: apache
       mode: 0777
   - service:
       name: "firewalld"
       state: stopped
-  - command: "mount 192.168.8.103:/cloud/ragh /root/ragh"
+  - command: "mount {{ master_ip }}:{{ master_path }} {{ tenant_path }}"
   - mount: 
-      path: "/root/ragh"
-      src: "192.168.8.103:/cloud/ragh"
-      fstype: ext4
+      path: "{{ tenant_ip }}"
+      src: "{{ master_ip }}:{{ master_path }}"
+      fstype: "{{ fstype }}"
       state: mounted
